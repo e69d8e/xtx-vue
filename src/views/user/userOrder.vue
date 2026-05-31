@@ -21,11 +21,13 @@ const params = ref({
 const orderList = ref([])
 const total = ref([])
 const getOrderList = async () => {
-  const res = await getUserOrderApi()
-  console.log(res)
-  console.log(1111)
-  orderList.value = res.data.result.items
-  total.value = res.data.result.counts
+  try {
+    const res = await getUserOrderApi()
+    orderList.value = res.data.result.items
+    total.value = res.data.result.counts
+  } catch {
+    // 错误提示已由响应拦截器处理
+  }
 }
 getOrderList()
 const handleClick = (type) => {

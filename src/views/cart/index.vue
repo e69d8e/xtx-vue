@@ -15,24 +15,33 @@ cartList.value = cartStore.cartList
 checked.value = cartList.value.every((item) => item.selected)
 // 改变商品数量和选中状态
 const onChange = async (skuId, count, selected) => {
-  await changeCountApi(skuId, { count, selected })
-  checked.value = cartList.value.every((item) => item.selected === true)
+  try {
+    await changeCountApi(skuId, { count, selected })
+    checked.value = cartList.value.every((item) => item.selected === true)
+  } catch {
+    // 错误提示已由响应拦截器处理
+  }
 }
 //  全选
 const onAllSelect = async () => {
-  const ids = cartList.value.map((item) => item.skuId)
-  // console.log(checked.value)
-  await allSelectApi({ selected: !checked.value, ids })
-  // console.log(res.data)
-  cartList.value.forEach((item) => (item.selected = checked.value))
+  try {
+    const ids = cartList.value.map((item) => item.skuId)
+    await allSelectApi({ selected: !checked.value, ids })
+    cartList.value.forEach((item) => (item.selected = checked.value))
+  } catch {
+    // 错误提示已由响应拦截器处理
+  }
 }
 // delete
 const onDelete = async (id) => {
-  await deleteApi([id])
-  // console.log(res.data)
-  const index = cartList.value.findIndex((item) => item.skuId === id)
-  cartList.value = cartList.value.splice(index, 1)
-  ElMessage.success('删除成功')
+  try {
+    await deleteApi([id])
+    const index = cartList.value.findIndex((item) => item.skuId === id)
+    cartList.value.splice(index, 1)
+    ElMessage.success('删除成功')
+  } catch {
+    // 错误提示已由响应拦截器处理
+  }
 }
 // total
 const total = computed(() => {
@@ -49,29 +58,25 @@ const selectTotal = computed(() => {
   return newCartList.reduce((sum, item) => sum + item.count, 0) || 0
 })
 // 删除选中的
-const onSelectDel = () => {
-  ElMessageBox.confirm('确认要删除勾选的商品吗？', '提示', {
-    confirmButtonText: '确认',
-    cancelButtonText: '取消',
-    type: 'warning'
-  })
-    .then(() => {
-      const ids = cartList.value
-        .filter((item) => item.selected)
-        .map((item) => item.skuId)
-      // console.log(ids)
-      deleteApi(ids)
-      ElMessage({
-        type: 'success',
-        message: '删除成功'
-      })
+const onSelectDel = async () => {
+  try {
+    await ElMessageBox.confirm('确认要删除勾选的商品吗？', '提示', {
+      confirmButtonText: '确认',
+      cancelButtonText: '取消',
+      type: 'warning'
     })
-    .catch(() => {
-      ElMessage({
-        type: 'info',
-        message: '删除取消'
-      })
-    })
+    const ids = cartList.value
+      .filter((item) => item.selected)
+      .map((item) => item.skuId)
+    await deleteApi(ids)
+    cartList.value = cartList.value.filter((item) => !item.selected)
+    ElMessage.success('删除成功')
+  } catch (e) {
+    // MessageBox 取消或 API 失败，错误提示已由响应拦截器处理
+    if (e === 'cancel') {
+      ElMessage({ type: 'info', message: '删除取消' })
+    }
+  }
 }
 </script>
 

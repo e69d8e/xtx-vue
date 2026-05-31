@@ -99,11 +99,14 @@ const change = async (obj) => {
 }
 // 加入购物车
 const addCart = async () => {
-  const res = await addCartApi(skuId.value, num.value)
-  console.log(res.data.result)
-  const cartStore = useCartStore()
-  cartStore.getCartList()
-  ElMessage.success('加入成功')
+  try {
+    await addCartApi(skuId.value, num.value)
+    const cartStore = useCartStore()
+    cartStore.getCartList()
+    ElMessage.success('加入成功')
+  } catch {
+    // 错误提示已由响应拦截器处理
+  }
 }
 </script>
 <template>

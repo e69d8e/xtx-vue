@@ -45,49 +45,57 @@ const codeRef = ref()
 const router = useRouter()
 // 账号heima293 密码hm#qd@23! 手机12056258293
 const login = async () => {
-  if (!isPhone.value) {
-    await pasRef.value.validate()
-    if (!checked.value) {
-      ElMessage.warning('请先阅读并同意《服务条款》和《服务条款》')
-      return
+  try {
+    if (!isPhone.value) {
+      await pasRef.value.validate()
+      if (!checked.value) {
+        ElMessage.warning('请先阅读并同意《服务条款》和《服务条款》')
+        return
+      }
+      // 发请求
+      const res = await loginPasApi(formPassword.value)
+      await userStore.setInfo(res.data.result)
+      ElMessage.success('登陆成功')
+    } else {
+      await codeRef.value.validate()
+      if (!checked.value) {
+        ElMessage.warning('请先阅读并同意《服务条款》和《服务条款》')
+        return
+      }
+      // 发请求
+      const res = await loginCodeApi(formCode.value)
+      await userStore.setInfo(res.data.result)
+      ElMessage.success('登陆成功')
     }
-    // 发请求
-    const res = await loginPasApi(formPassword.value)
-    await userStore.setInfo(res.data.result)
-    ElMessage.success('登陆成功')
-  } else {
-    await codeRef.value.validate()
-    if (!checked.value) {
-      ElMessage.warning('请先阅读并同意《服务条款》和《服务条款》')
-      return
-    }
-    // 发请求
-    const res = await loginCodeApi(formCode.value)
-    await userStore.setInfo(res.data.result)
-    ElMessage.success('登陆成功')
+    router.push('/')
+  } catch {
+    // 表单验证失败或API错误，错误提示已由响应拦截器处理
   }
-  router.push('/')
 }
 const timeStr = ref('获取验证码')
 const time = ref(60)
 const flag = ref(false)
 const getCode = async () => {
-  await getCodeApi(formCode.value.mobile)
   if (flag.value) {
     return
   }
-  timeStr.value = '60秒后获取'
-  flag.value = true
-  time.value = 60
-  let timeId = setInterval(() => {
-    time.value = time.value - 1
-    timeStr.value = `${time.value}秒后获取`
-    if (time.value <= 0) {
-      flag.value = false
-      clearInterval(timeId)
-      timeStr.value = '获取验证码'
-    }
-  }, 1000)
+  try {
+    await getCodeApi(formCode.value.mobile)
+    timeStr.value = '60秒后获取'
+    flag.value = true
+    time.value = 60
+    let timeId = setInterval(() => {
+      time.value = time.value - 1
+      timeStr.value = `${time.value}秒后获取`
+      if (time.value <= 0) {
+        flag.value = false
+        clearInterval(timeId)
+        timeStr.value = '获取验证码'
+      }
+    }, 1000)
+  } catch {
+    // 错误提示已由响应拦截器处理
+  }
 }
 </script>
 <template>

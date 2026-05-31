@@ -32,6 +32,7 @@ instance.interceptors.response.use(
     // 对响应数据做点什么
     if (response.data.code !== '1') {
       ElMessage.error(response.data.msg)
+      return Promise.reject(response.data)
     }
     // console.log(response.status)
     return response
@@ -39,8 +40,12 @@ instance.interceptors.response.use(
   function (error) {
     // 超出 2xx 范围的状态码都会触发该函数。
     // 对响应错误做点什么
-    if (error.response.status === 401) {
+    if (error.response?.status === 401) {
       router.push('/login')
+    } else {
+      ElMessage.error(
+        error.response?.data?.msg || error.response?.data?.message || '请求失败'
+      )
     }
     return Promise.reject(error)
   }

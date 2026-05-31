@@ -31,22 +31,30 @@ const address = ref({
 })
 // 获取地址
 const getAddress = async () => {
-  const addressRes = await getAddressApi()
-  addresses.value = addressRes.data.result
-  address.value = addresses.value.find((item) => item.isDefault === 0) || {
-    address: '',
-    id: '',
-    receiver: '',
-    contact: '',
-    isDefault: 0,
-    fullLocation: ''
+  try {
+    const addressRes = await getAddressApi()
+    addresses.value = addressRes.data.result
+    address.value = addresses.value.find((item) => item.isDefault === 0) || {
+      address: '',
+      id: '',
+      receiver: '',
+      contact: '',
+      isDefault: 0,
+      fullLocation: ''
+    }
+  } catch {
+    // 错误提示已由响应拦截器处理
   }
 }
 getAddress()
 const getOrder = async () => {
-  const res = await getOrderApi()
-  goodsList.value = res.data.result.goods
-  sumObj.value = res.data.result.summary
+  try {
+    const res = await getOrderApi()
+    goodsList.value = res.data.result.goods
+    sumObj.value = res.data.result.summary
+  } catch {
+    // 错误提示已由响应拦截器处理
+  }
 }
 getOrder()
 const changeAddress = ref(false)
@@ -79,10 +87,13 @@ const confirmSwitch = async () => {
     ElMessage.warning('请先选择要修改的地址')
     return
   }
-  address.value = tmpAddredd.value
-  await changeAddressApi(id.value, address.value)
-  // getAddress()
-  changeAddress.value = false
+  try {
+    await changeAddressApi(id.value, tmpAddredd.value)
+    address.value = tmpAddredd.value
+    changeAddress.value = false
+  } catch {
+    // 错误提示已由响应拦截器处理
+  }
 }
 const cancleSwitch = () => {
   changeAddress.value = false
@@ -102,10 +113,14 @@ const addressData = ref({
   provinceCode: '344900'
 })
 const comfirmAdd = async () => {
-  await addAddressApi(addressData.value) //
-  getAddress()
-  addAddress.value = false
-  ElMessage.success('添加成功')
+  try {
+    await addAddressApi(addressData.value)
+    await getAddress()
+    addAddress.value = false
+    ElMessage.success('添加成功')
+  } catch {
+    // 错误提示已由响应拦截器处理
+  }
 }
 const cancleAdd = () => {
   addAddress.value = false
@@ -123,10 +138,14 @@ const confirmDel = async () => {
     ElMessage.warning('请先选择要删除的地址')
     return
   }
-  await deleteAddressApi(delId.value)
-  deletlDialog.value = false
-  getAddress()
-  ElMessage.success('删除成功')
+  try {
+    await deleteAddressApi(delId.value)
+    deletlDialog.value = false
+    getAddress()
+    ElMessage.success('删除成功')
+  } catch {
+    // 错误提示已由响应拦截器处理
+  }
 }
 const cancelDelete = () => {
   delId.value = ''
@@ -139,23 +158,26 @@ const onGoPay = async () => {
     ElMessage.warning('请先选择收货地址')
     return
   }
-  const res = await commitOrderApi({
-    deliveryTimeType: 1,
-    payType: 1,
-    payChannel: 1,
-    buyerMessage: '',
-    goods: goodsList.value,
-    addressId: address.value.id
-  })
-  ElMessage.success('订单提交成功')
-  console.log(res.data)
-  router.push({
-    path: '/pay',
-    query: {
-      id: res.data.result.id,
-      price: res.data.result.payMoney
-    }
-  })
+  try {
+    const res = await commitOrderApi({
+      deliveryTimeType: 1,
+      payType: 1,
+      payChannel: 1,
+      buyerMessage: '',
+      goods: goodsList.value,
+      addressId: address.value.id
+    })
+    ElMessage.success('订单提交成功')
+    router.push({
+      path: '/pay',
+      query: {
+        id: res.data.result.id,
+        price: res.data.result.payMoney
+      }
+    })
+  } catch {
+    // 错误提示已由响应拦截器处理
+  }
 }
 </script>
 <template>

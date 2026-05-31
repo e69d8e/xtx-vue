@@ -7,8 +7,12 @@ export const useCartStore = defineStore(
   () => {
     const cartList = ref([])
     const getCartList = async () => {
-      const res = await getCartListApi()
-      cartList.value = res.data.result
+      try {
+        const res = await getCartListApi()
+        cartList.value = res.data.result
+      } catch {
+        // 错误提示已由响应拦截器处理
+      }
     }
     return { cartList, getCartList }
   },

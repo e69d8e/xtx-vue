@@ -13,9 +13,12 @@ onMounted(() => {
 })
 const goodsList = ref([])
 const getLike = async () => {
-  const res = await getLikeApi()
-  // console.log(res.data.result)
-  goodsList.value = res.data.result
+  try {
+    const res = await getLikeApi()
+    goodsList.value = res.data.result
+  } catch {
+    // 错误提示已由响应拦截器处理
+  }
 }
 getLike()
 </script>
