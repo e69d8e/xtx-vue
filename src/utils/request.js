@@ -7,7 +7,7 @@ const router = useRouter()
 const userStore = useUserStore()
 // 创建axios实例
 const instance = axios.create({
-  baseURL: 'http://pcapi-xiaotuxian-front-devtest.itheima.net',
+  baseURL: '/api',
   timeout: 100000,
   headers: { 'X-Custom-Header': 'foobar' }
 })
@@ -51,4 +51,4 @@ instance.interceptors.response.use(
   }
 )
 export default instance
-export const baseURL = 'http://pcapi-xiaotuxian-front-devtest.itheima.net'
+export const baseURL = '/api'
